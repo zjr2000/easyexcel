@@ -100,8 +100,8 @@ public class FileUtils {
     /**
      * Write inputStream to file
      *
-     * @param file
-     * @param inputStream
+     * @param file The specified written file
+     * @param inputStream The specified stream to write to the file
      */
     public static void writeToFile(File file, InputStream inputStream) {
         OutputStream outputStream = null;
@@ -132,6 +132,12 @@ public class FileUtils {
         }
     }
 
+    /**
+     * CS304 Issue link: https://github.com/alibaba/easyexcel/issues/1840
+     * Write inputStream to file but not close inputStream
+     * @param file The specified written file
+     * @param inputStream The specified stream to write to the file
+     */
     public static void writeToFileNotCloseStream(File file, InputStream inputStream) {
         OutputStream outputStream = null;
         try {

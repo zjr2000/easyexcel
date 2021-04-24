@@ -125,12 +125,16 @@ public class XlsxSaxAnalyser implements ExcelReadExecutor {
     }
 
     private void analysisSharedStringsTable(InputStream sharedStringsTableInputStream,
-        XlsxReadWorkbookHolder xlsxReadWorkbookHolder) throws Exception {
+                                            XlsxReadWorkbookHolder xlsxReadWorkbookHolder) throws Exception {
         ContentHandler handler = new SharedStringsTableHandler(xlsxReadWorkbookHolder.getReadCache());
         parseXmlSource(sharedStringsTableInputStream, handler);
         xlsxReadWorkbookHolder.getReadCache().putFinished();
     }
 
+
+    /**
+     * CS304 Issue link: https://github.com/alibaba/easyexcel/issues/1840
+     */
     private OPCPackage readOpcPackage(XlsxReadWorkbookHolder xlsxReadWorkbookHolder, InputStream decryptedStream)
         throws Exception {
         if (decryptedStream == null && xlsxReadWorkbookHolder.getFile() != null) {
@@ -147,11 +151,18 @@ public class XlsxSaxAnalyser implements ExcelReadExecutor {
         xlsxReadWorkbookHolder.setTempFile(readTempFile);
         File tempFile = new File(readTempFile.getPath(), UUID.randomUUID().toString() + ".xlsx");
         if (decryptedStream != null) {
-            if(xlsxReadWorkbookHolder.getAutoCloseStream()) FileUtils.writeToFile(tempFile, decryptedStream);
-            else FileUtils.writeToFileNotCloseStream(tempFile, decryptedStream);
+            if(xlsxReadWorkbookHolder.getAutoCloseStream()){
+                FileUtils.writeToFile(tempFile, decryptedStream);
+            } else{
+                FileUtils.writeToFileNotCloseStream(tempFile, decryptedStream);
+            }
         } else {
-            if(xlsxReadWorkbookHolder.getAutoCloseStream()) FileUtils.writeToFile(tempFile, xlsxReadWorkbookHolder.getInputStream());
-            else FileUtils.writeToFileNotCloseStream(tempFile, xlsxReadWorkbookHolder.getInputStream());
+            if(xlsxReadWorkbookHolder.getAutoCloseStream()){
+                FileUtils.writeToFile(tempFile, xlsxReadWorkbookHolder.getInputStream());
+            }
+            else{
+                FileUtils.writeToFileNotCloseStream(tempFile, xlsxReadWorkbookHolder.getInputStream());
+            }
         }
         return OPCPackage.open(tempFile, PackageAccess.READ);
     }

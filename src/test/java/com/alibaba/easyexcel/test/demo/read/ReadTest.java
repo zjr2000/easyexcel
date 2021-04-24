@@ -1,9 +1,14 @@
 package com.alibaba.easyexcel.test.demo.read;
 
-import java.io.File;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.excel.event.Listener;
+import com.alibaba.excel.read.builder.ExcelReaderBuilder;
+import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
+import com.alibaba.excel.read.listener.ReadListener;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -20,6 +25,8 @@ import com.alibaba.excel.enums.CellExtraTypeEnum;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.fastjson.JSON;
 
+import javax.validation.constraints.AssertTrue;
+
 /**
  * 读的常见写法
  *
@@ -29,6 +36,37 @@ import com.alibaba.fastjson.JSON;
 public class ReadTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadTest.class);
+
+
+    /**
+     * CS304 (manually written) Issue link: https://github.com/alibaba/easyexcel/issues/1840
+     * Test issue #1840 negative
+     * Test that the input stream is not closed as expected after read.
+     */
+    @Test
+    public void testReadStreamNotClosed() throws IOException{
+        String filePth = TestFileUtil.getPath() + "demo" + File.separator + "demo.xlsx";
+        InputStream inputStream = new FileInputStream(filePth);
+        ExcelReaderBuilder excelReaderBuilder = EasyExcel.read(inputStream, DemoData.class, new DemoDataListener());
+        excelReaderBuilder.autoCloseStream(false);
+        ExcelReaderSheetBuilder excelReaderSheetBuilder = excelReaderBuilder.sheet("Sheet2");
+        excelReaderSheetBuilder.doRead();
+        inputStream.read();
+    }
+
+    /**
+     * CS304 (manually written) Issue link: https://github.com/alibaba/easyexcel/issues/1840
+     * Test issue #1840 positive
+     * Test normal read
+     */
+    @Test
+    public void testReadStreamClosed() throws IOException{
+        String filePth = TestFileUtil.getPath() + "demo" + File.separator + "demo.xlsx";
+        InputStream inputStream = new FileInputStream(filePth);
+        ExcelReaderBuilder excelReaderBuilder = EasyExcel.read(inputStream, DemoData.class, new DemoDataListener());
+        ExcelReaderSheetBuilder excelReaderSheetBuilder = excelReaderBuilder.sheet("Sheet2");
+        excelReaderSheetBuilder.doRead();
+    }
 
     /**
      * 最简单的读
